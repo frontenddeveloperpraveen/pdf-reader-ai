@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>PDFSensei</title>
+    <style>
+        html {
+            background-color: #FECD45;
+        }
+
+        #Logo {
+            font-family: 'Pacifico', cursive;
+            font-size: 30px;
+            font-weight: bold;
+            text-decoration: none;
+            letter-spacing: 3.5px;
+            color: black;
+        }
+
+        nav {
+            margin-top: 20px;
+            text-align: center;
+            background-color: #FECD45;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            border: none;
+            background-color: #FECD45;
+        }
+
+        #upload{
+            width: fit-content;
+            margin: auto;
+            margin-top: 70px;
+            padding: 50px;
+            background-color: whitesmoke;
+            border-radius: 5px;
+            box-shadow:5px -3px 30px 1px rgba(0, 0, 0, 0.2);
+            box-sizing: border-box;
+
+        }
+        #upload i{
+            display: flex;
+            justify-content: center;
+        }
+        #upload h6{
+            margin-top: 30px;
+            margin-left: 3px;
+        }
+        #upload button{
+            display: flex;
+            margin-left: 16px;
+            margin-top: 30px;
+            border-radius: 4px;
+        }
+
+        #genn{
+            display: none;
+        }
+
+
+
+        .skeleton {
+            position: relative;
+        }
+        .skeleton::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            background: linear-gradient(90deg, #e3e3e3, #f9f9f9, #e3e3e3 100%);
+            background-size: 200%;
+            animation: skeleton 1s infinite reverse;
+        }
+        @keyframes skeleton {
+            0% {
+                background-position: -100% 0;
+            }
+            100% {
+                background-position: 100% 0;
+            }
+        }
+
+        .text{
+            background-color: beige;
+            width: 90%;
+            height: 400px;
+            margin: auto;
+            margin-top: 50px;
+            overflow: scroll;
+            box-sizing: border-box;
+            display: none;
+
+        }
+
+        .text p{
+            margin-top: 15px;
+            padding: 10px;
+            text-align: justify;
+        }
+
+        .text i{
+            border: black 1px solid;
+            padding: 5px;
+            float: right;
+            
+        }
+        
+    </style>
+  </head>
+  <body>
+    
+    <nav>
+        <a href="" id="Logo">Pdf to Text Converter</a>    
+    </nav>
+
+    <section id="upload">
+        <i class="fa-solid fa-upload fa-2xl"></i>
+        <h6 id="gen">Upload PDF Here</h6>
+        <form action="" id="uploader">
+            <input type="file" id="fileInput" accept=".pdf" name="file" style="display: none;">
+            <input type="hidden" id="csrfToken" value="{{ csrf_token }}">
+        </form>
+        <button onclick="document.getElementById('fileInput').click()" class="btn btn-primary">Browse File</button>
+    </section>
+    <h6 id="genn" style="text-align: center; margin-top: 50px;">AI is analyzing your PDF</h6>
+    <div class="text skeleton" id="text">
+        <i id='notice' class="fa-solid fa-copy" onclick="copyText()"></i>
+        <p id="text-info"></p>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.17/dist/sweetalert2.min.js" integrity="sha384-QU1cBPj8py2qSS/hUD6tcxUq+uD95fEtbjkchY5sZ0h3Vx4rlRKEUeOKU94YAR33" crossorigin="anonymous"></script>
+    <script>
+      function copyText() {
+        var text = document.getElementById('text-info').textContent;
+        var tempInput = document.createElement('input');
+        tempInput.type = 'text';
+        tempInput.value = text;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999); 
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        var butt = document.getElementById('notice')
+        butt.classList.remove('fa-copy') 
+        butt.classList.add('fa-check') 
+      }
+
+      document.getElementById('fileInput').addEventListener('change', function() {
+        var file = this.files[0];
+
+        if (file && file.type === 'application/pdf') {
+          var uploadDiv = document.getElementById('upload');
+          uploadDiv.style.display = 'none';
+          var textDiv = document.getElementById('text');
+          textDiv.style.display = 'block';
+          var noticeText = document.getElementById('genn');
+          noticeText.style.display = 'block';
+          var textContent = document.getElementById('text-info');
+
+          var form = document.getElementById('uploader');
+          var data = new FormData(form);
+          data.append('csrfmiddlewaretoken', document.getElementById('csrfToken').value);
+
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', 'upload', true);
+          xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+              if (xhr.status === 200) {
+                textDiv.classList.remove('skeleton');
+                var response = JSON.parse(xhr.responseText);
+                textContent.innerHTML = response.text;
+                noticeText.innerHTML = 'Pdf Decoded - AI (if its blank then OCR decoding isnt possible by our AI)'
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Oops...',
+                  text: 'An error occurred while processing the PDF!',
+                });
+              }
+            }
+          };
+          xhr.send(data);
+
+          console.log('File Uploaded: ', file.name);
+        } else {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Invalid File',
+            text: 'Please select a PDF file!',
+          });
+        }
+      });
+    </script>
+
+  </body>
+</html>
